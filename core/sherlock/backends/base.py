@@ -26,7 +26,7 @@ class FileIndexer(object):
         """Returns the total document count."""
         raise NotImplementedError
 
-    def open_index(self, path, *args, **kwargs):
+    def open_index(self, write=False, *args, **kwargs):
         """Opens the index at the specified path."""
         raise NotImplementedError
 
@@ -34,21 +34,18 @@ class FileIndexer(object):
         """Creates the index at the specified path."""
         raise NotImplementedError
 
-    def begin_index_file(self, filepath):
-        """Called before file indexing operations. Usually used to
-        open document writers for the indexer.
-        """
+    def begin(self):
+        """Starts the index transaction. Not all of the indexing engines support it,
+        but those that do, should use this function"""
+        pass
+
+    def commit(self):
+        """If the engine supports commiting the transaction, it should make use of this function."""
         pass
 
     def index_file(self, filepath, *args, **kwargs):
         """Indexes and stores the file at the specified path."""
         raise NotImplementedError
-
-    def end_index_file(self, filepath):
-        """Called after file indexing operations. Usually used to
-        commit the changes to the indexer.
-        """
-        pass
 
     def index_exists(self, path):
         """Returns True if an index exist at the specified path, False otherwise

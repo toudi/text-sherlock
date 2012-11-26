@@ -22,12 +22,9 @@ except ImportError:
 
 from webapp import server
 from core.sherlock import indexer, backends, db
-from core import FORCE_INDEX_REBUILD, utils, get_version_info, \
-    SherlockMeta, SHORT_DATE_FORMAT
+from core import get_version_info
 import settings
-import os
 import sys
-from datetime import datetime
 
 
 def get_app_args():
@@ -65,6 +62,7 @@ def get_options():
                  help=('Indexes the in the path specified by '
                        'settings.INDEX_PATH. Use `update` (default) or '
                        '`rebuild` to replace the entire index.'))
+    add_argument('--verbose', action="store_true", default=False)
     options = get_app_args()
     return options
 
@@ -99,22 +97,7 @@ def run_server():
 
 
 def reindex():
-    path = utils.resolve_path(settings.INDEX_PATH)
-    # check path
-    if not path.endswith('/'):
-        raise Exception('INDEX_PATH must end with a trailing slash. %s' % path)
-    if not os.path.exists(path):
-        raise Exception('Check INDEX_PATH. Does it exist? %s' % path)
-    print 'Indexing path: %s' % path
-    if FORCE_INDEX_REBUILD:
-        wait_time = 5 # seconds to wait/pause until rebuilding index
-        print 'Reindexing everything!'
-        print 'Waiting %ss for interrupt...' % wait_time
-        import time
-        time.sleep(wait_time)
-    indexer.index_path(path)
-    # record indexed time
-    SherlockMeta.set('last_indexed', datetime.now().strftime(SHORT_DATE_FORMAT))
+    indexer.run(get_app_args())
 
 
 def run():

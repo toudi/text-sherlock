@@ -11,16 +11,17 @@ http://packages.python.org/Whoosh/indexing.html
 __author__ = 'C. Bess'
 
 import os
-from whoosh.index import create_in, open_dir, exists_in
+from whoosh.index import create_in, open_dir, exists_in, EmptyIndexError
 from whoosh.fields import *
 from whoosh.qparser import QueryParser
 from whoosh import highlight
 from core import settings
 from core.sherlock import logger
-from core.utils import debug, safe_read_file, fragment_text, read_file
+from core.utils import safe_read_file, fragment_text, read_file, resolve_path
 from base import FileSearcher, FileIndexer, SearchResult, SearchResults
-
+from settings import INDEXES_PATH
 ## Indexer
+
 
 class WhooshIndexer(FileIndexer):
     # Text index schema
@@ -30,9 +31,14 @@ class WhooshIndexer(FileIndexer):
         content=TEXT
     )
     _index = None
-    
+
     def __init__(self, *args, **kwargs):
         super(WhooshIndexer, self).__init__(*args, **kwargs)
+        self._path = os.path.join(resolve_path(INDEXES_PATH), kwargs['project'])
+        if not os.path.exists(self._path):
+            os.makedirs(self._path)
+        self._index = None
+        self._writer = None
         pass
 
     @property
@@ -44,20 +50,26 @@ class WhooshIndexer(FileIndexer):
             return -1
         return self._index.doc_count_all()
 
-    def open_index(self, path, *args, **kwargs):
-        self._index = open_dir(path)
+    def open_index(self, write=False):
+        if not self._index:
+            try:
+                self._index = open_dir(self._path)
+            except EmptyIndexError:
+                self.create_index()
+        if write and not self._writer:
+            self._writer = self._index.writer()
+
+    def create_index(self):
+        self._index = create_in(self._path, self.schema)
+
+    def begin(self):
         pass
 
-    def create_index(self, path, *args, **kwargs):
-        self._index = create_in(path, self.schema)
-        pass
-
-    def begin_index_file(self, filepath):
-        self._writer = self._index.writer()
-        pass
+    def commit(self):
+        self._writer.commit()
 
     def index_file(self, filepath, *args, **kwargs):
-        assert self._index is not None
+        self.open_index(True)
         contents = safe_read_file(filepath)
         if contents is None:
             return
@@ -69,10 +81,6 @@ class WhooshIndexer(FileIndexer):
             content=contents + path
         )
         self._writer.update_document(**doc)
-        pass
-
-    def end_index_file(self, filepath):
-        self._writer.commit()
         pass
 
     def index_exists(self, path):

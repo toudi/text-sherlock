@@ -147,3 +147,10 @@ def datetime_to_phrase(date_time):
     if not (xdays or months or years):
         datelets.append('%d minute%s' % (minutes, plural(minutes)))
     return ', '.join(datelets) + ' ago.'
+
+
+def import_by_name(name):
+    components = name.split('.')
+    mod = __import__('.'.join(components[:-1]), fromlist=components[-1])
+
+    return getattr(mod, components[-1])

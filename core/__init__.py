@@ -13,7 +13,6 @@ __all__ = [
 from cherrypy import wsgiserver as cherrypy_wsgiserver
 import flask
 import os
-import peewee
 import pygments
 import sys
 import whoosh
