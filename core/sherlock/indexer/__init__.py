@@ -73,7 +73,7 @@ class Indexer(object):
         if self.file_allow[project] and self.file_allow[project].search(_file.basename()):
             return True
 
-        return True
+        return self.file_allow[project] is None
 
 
 def run(app_args):

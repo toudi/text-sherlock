@@ -47,6 +47,7 @@ class BaseModel(peewee.Model):
 
 
 class IndexerMeta(BaseModel):
+    project = peewee.CharField()
     """Represents the indexer meta data created during the indexing process."""
     path = peewee.CharField(unique=True,
                             help_text='The absolute path of the item.')
@@ -58,7 +59,12 @@ class IndexerMeta(BaseModel):
     def __unicode__(self):
         return u'<IndexerMeta: %d:%s>' % (self.id, self.path)
 
+class ProjectMeta(BaseModel):
+    name = peewee.CharField(help_text='Project\'s name')
+    rev  = peewee.CharField(help_text='id of last revision')
+
 IndexerMeta.create_table(fail_silently=True)
+ProjectMeta.create_table(fail_silently=True)
 
 
 ## Database Methods

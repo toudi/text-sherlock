@@ -1,8 +1,12 @@
 from path import path as _path
 from core.utils import resolve_path
+from . import IndexSource
+from ...db import IndexerMeta
+import os
+from datetime import datetime
 
 
-class FileSystem(object):
+class FileSystem(IndexSource):
     def __init__(self, path, project, recursive=False):
         if '%(sherlock_dir)s' in path:
             path = resolve_path(path)
@@ -11,26 +15,48 @@ class FileSystem(object):
         self.project = project
         self.indexer = None
         self._index = None
+        self._files = {}
 
-    def index(self, indexer):
-        self.indexer = indexer
-        self._index = indexer.get_index(self.project)
-        self._index.begin()
-        if self.indexer.app_args.reindex == 'rebuild':
-            self._index.create_index()
-        self.scan(self.path)
-        #please note, that only the FileSystem source uses the clean_index method.
-        #other sources (such as git/svn) remove files from the index manually, as needed.
-        self._index.clean_index()
-        self._index.commit()
+    def get_files_for_index(self, mode='update'):
+        if mode == 'rebuild':
+            IndexerMeta.delete().execute()
+        self.scan(self.path, mode)
+        return self._files.keys()
 
-    def scan(self, _dir):
+    def scan(self, _dir, mode='update'):
         for _file in _dir.files():
-            if self.indexer.is_allowed(self.project, _file):
-                self.indexer.log(":: Adding file '%s' to index", _file)
-                self._index.index_file(_file)
+            mtime = datetime.fromtimestamp(os.stat(_file).st_mtime)
+            f = IndexerMeta.select().where(
+                IndexerMeta.project == self.project,
+                IndexerMeta.path == _file
+            )
+            if f.exists():
+                if f.get().mod_date < mtime or mode == 'rebuild':
+                    self._files[_file] = mtime
+            else:
+                self._files[_file] = mtime
+
         if self.recursive:
             for _dir_ in _dir.dirs():
-                if self.indexer.is_allowed(self.project, _dir_):
-                    self.indexer.log(":: Scanning '%s' dir..", _dir_)
-                    self.scan(_path(_dir_))
+                self.scan(_path(_dir_), mode)
+
+    def indexing_finished(self):
+        now = datetime.now()
+        self._index.clean_index()
+
+        for _file, mtime in self._files.items():
+            f = IndexerMeta.select().where(
+                IndexerMeta.project == self.project,
+                IndexerMeta.path == _file
+            )
+
+            if f.exists():
+                f = f.get()
+            else:
+                f = IndexerMeta(
+                    project=self.project,
+                    path=_file,
+                    date_added=now
+                )
+            f.mod_date = mtime
+            f.save()

@@ -66,7 +66,8 @@ class WhooshIndexer(FileIndexer):
         pass
 
     def commit(self):
-        self._writer.commit()
+        if self._writer:
+            self._writer.commit()
 
     def index_file(self, filepath, *args, **kwargs):
         self.open_index(True)
