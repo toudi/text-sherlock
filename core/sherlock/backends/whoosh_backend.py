@@ -43,12 +43,12 @@ class WhooshIndexer(FileIndexer):
 
     @property
     def index(self):
+        if not self._index:
+            self.open_index()
         return self._index
 
     def doc_count(self):
-        if not self._index:
-            return -1
-        return self._index.doc_count_all()
+        return self.index.doc_count_all()
 
     def open_index(self, write=False):
         if not self._index:
@@ -61,6 +61,12 @@ class WhooshIndexer(FileIndexer):
 
     def create_index(self):
         self._index = create_in(self._path, self.schema)
+
+    def clear(self):
+        """
+        According to whoosh's docs, calling create_in on existing index clears it.
+        """
+        return self.create_index()
 
     def begin(self):
         pass
@@ -104,12 +110,15 @@ class WhooshIndexer(FileIndexer):
         #self.index.commit()
         pass
 
+    def searcher(self):
+        return WhooshSearcher(self)
+
 ## Searcher
 
 class WhooshSearcher(FileSearcher):
     def __init__(self, indexer):
         super(WhooshSearcher, self).__init__(indexer)
-        self._index = indexer.index
+        self._index = indexer
         pass
 
     def find_path(self, path):

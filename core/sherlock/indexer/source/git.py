@@ -27,9 +27,8 @@ class Git(IndexSource):
                 call([
                     'git', 'clone', self.url, repo
                 ])
-            else:
-                os.chdir(repo)
-                call(['git', 'pull'])
+            os.chdir(repo)
+            call(['git', 'pull'])
 
             with open('/dev/null', 'w') as devn:
                 call(['git', 'checkout', 'origin/%s' % self.branch], stdout=devn, stderr=devn)
@@ -58,7 +57,7 @@ class Git(IndexSource):
             return check_output(
                 self.git_diff_info % (last_rev, 'D'),
                 shell=True
-            ).split('\n')
+            ).split('\n')[:-1]
 
         return ()
 
@@ -66,12 +65,12 @@ class Git(IndexSource):
         last_rev = self.get_last_rev()
 
         if last_rev is None or mode == 'rebuild':
-            return check_output(['git', 'ls-files']).split('\n')
+            return check_output(['git', 'ls-files']).split('\n')[:-1]
 
         return check_output(
             self.git_diff_info % (last_rev, '(A|M)'),
             shell=True
-        ).split('\n')
+        ).split('\n')[:-1]
 
     def indexing_finished(self):
         project = ProjectMeta.select().where(ProjectMeta.name == self.project)

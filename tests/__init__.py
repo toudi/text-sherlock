@@ -32,6 +32,24 @@ def adjust_test_settings():
         '.py',
     )
 
+    settings.PROJECTS = {
+        "Test project": {
+            "SOURCE": 'core.sherlock.indexer.source.filesystem.FileSystem',
+            "SETTINGS": {
+                'path': '%(sherlock_dir)s/tests/text',
+                'recursive': True
+            },
+            "EXCLUDE_FILE_SUFFIX": ['m', 'h']
+        },
+        "Git project": {
+            "SOURCE": 'core.sherlock.indexer.source.git.Git',
+            "SETTINGS": {
+                'url': '%(sherlock_dir)s/tests/git-repo' % {'sherlock_dir': os.path.dirname(__file__) + '/../'}
+            }
+        }
+    }
+
+
 
 def run_all():
     """Runs all unit tests

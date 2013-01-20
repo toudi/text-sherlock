@@ -75,6 +75,8 @@ class FileIndexer(object):
         """Returns all indexed file documents."""
         return db.IndexerMeta.select()
 
+    def searcher(self):
+        raise NotImplementedError
     
 ## Searcher Base Classes
 

@@ -39,19 +39,37 @@ class Indexer(object):
 
         for project, options in PROJECTS.items():
             logging.debug('-> indexing project "%s"', project)
-            source_engine = import_by_name(options['SOURCE'])
-            options['SETTINGS']['project'] = project
-            source = source_engine(**options['SETTINGS'])
-            source.index(self)
+            self.index_project(project, options)
 
     def log(self, *args):
         logging.debug(*args)
 
-    def get_index(self, project):
+    def index_project(self, project, options):
+        """
+        This is a separate method for the tests to be able to use it
+        (without the need to repeating code: DRY)
+        """
+        source_engine = import_by_name(options['SOURCE'])
+        options['SETTINGS']['project'] = project
+        source = source_engine(**options['SETTINGS'])
+        source.index(self)
+
+
+    def get_index(self, project, inline=None):
+        """
+        @param project: Project's name (as defined in local_settings.py)
+        @param inline: inline definition of the project. This parameter
+         is used for tests (as they have to define artificial projects)
+        """
         if project not in self.backends:
             backend = import_by_name(INDEXING_BACKEND)
-            if 'BACKEND' in PROJECTS[project]:
-                backend = import_by_name(PROJECTS[project]['BACKEND'])
+            if inline:
+                definition = inline
+                PROJECTS[project] = inline
+            else:
+                definition = PROJECTS[project]
+            if 'BACKEND' in definition:
+                backend = import_by_name(definition['BACKEND'])
             self.backends[project] = backend(project=project)
         return self.backends[project]
 

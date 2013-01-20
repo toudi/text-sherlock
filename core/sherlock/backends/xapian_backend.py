@@ -34,6 +34,7 @@ DEFAULT_SEARCH_FLAGS = (
 class XapianIndexer(FileIndexer):
     DOC_VALUE_FILENAME = 0
     DOC_VALUE_FILEPATH = 1
+    searcher_class = XapianSearcher
     def __init__(self, *args, **kwargs):
         super(XapianIndexer, self).__init__(*args, **kwargs)
         self._path = None
