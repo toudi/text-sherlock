@@ -31,11 +31,13 @@ class TestIndexer(testcase.BaseTestCase):
         app_args = TestAppArgs()
         self.indexer = indexer.Indexer(app_args)
         self.idx = self.indexer.get_index(TEST_PROJECT_NAME, self.TEST_PROJECT)
-        self.idx.clear()
+        self.git_idx = self.indexer.get_index(GIT_PROJECT_NAME, self.GIT_PROJECT)
         pass
 
     def tearDown(self):
         """ Called after each test """
+        self.git_idx.clear()
+        self.idx.clear()
         pass
 
     def test_indexer_creation(self):
@@ -70,9 +72,8 @@ class TestIndexer(testcase.BaseTestCase):
         self.assertTrue(self.idx.doc_count() == num_files_expected, 'bad doc count, expected %d but, indexed %d' % (num_files_expected, self.idx.doc_count()))
 
     def test_index_git_project(self):
-        git_idx = self.indexer.get_index(GIT_PROJECT_NAME, self.GIT_PROJECT)
         self.indexer.index_project(GIT_PROJECT_NAME, self.GIT_PROJECT)
-        self.assertEquals(git_idx.doc_count(), 2, 'Expected 2 files in test git project, but found %d instead' % git_idx.doc_count())
+        self.assertEquals(self.git_idx.doc_count(), 2, 'Expected 2 files in test git project, but found %d instead' % self.git_idx.doc_count())
 
     def test_index_between_commits(self):
         call([
@@ -80,26 +81,26 @@ class TestIndexer(testcase.BaseTestCase):
             '-rf',
             os.path.dirname(__file__) + '/../src/Git project'
         ])
-        # git_idx = self.indexer.get_index(GIT_PROJECT_NAME, self.GIT_PROJECT)
-        # v2_path = 'new-file-in-v2.txt'
-        # v1_sha = 'e8dae9983fb33b268a566aab69a3c4867d93f234'
-        # #let's check if git only indexes one file after pulling.
+        v2_path = 'new-file-in-v2.txt'
+        v1_sha = 'e8dae9983fb33b268a566aab69a3c4867d93f234'
+        v2_sha = '7aef7c94376cdd54e6ddba2bb802a294237de0bb'
+        #let's check if git only indexes one file after pulling.
 
-        # searcher = git_idx.searcher()
-        # # this file is added only in v2 tag, therefore it should not be present
-        # self.assertEquals(len(searcher.find_path(v2_path)), 0, 'file from v2 tag is already in the index')
+        searcher = self.git_idx.searcher()
+        # this file is added only in v2 tag, therefore it should not be present
+        self.assertEquals(len(searcher.find_path(v2_path)), 0, 'file from v2 tag is already in the index')
 
-        # project = ProjectMeta.select().where(ProjectMeta.name == GIT_PROJECT_NAME).get()
-        # project.rev = v1_sha
-        # project.save()
+        project = ProjectMeta.select().where(ProjectMeta.name == GIT_PROJECT_NAME).get()
+        project.rev = v1_sha
+        project.save()
 
-        # self.indexer.index_project(GIT_PROJECT_NAME, self.GIT_PROJECT)
+        self.indexer.index_project(GIT_PROJECT_NAME, self.GIT_PROJECT)
 
-        # self.assertEquals(len(searcher.find_path(v2_path)), 1, 'file from v2 tag doesn\'t appear to be in the index')
-        # project = ProjectMeta.select().where(ProjectMeta.name == GIT_PROJECT_NAME).get()
-        # last_rev = project.rev
+        self.assertEquals(len(searcher.find_path(v2_path)), 1, 'file from v2 tag doesn\'t appear to be in the index')
+        project = ProjectMeta.select().where(ProjectMeta.name == GIT_PROJECT_NAME).get()
+        last_rev = project.rev
 
-        # self.assertEquals(last_rev, v1_sha, 'git didn\'t update the sha after indexing!')
+        self.assertEquals(last_rev, v2_sha, 'git didn\'t update the sha after indexing!')
 
 
 def run():

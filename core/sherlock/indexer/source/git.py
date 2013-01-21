@@ -73,6 +73,7 @@ class Git(IndexSource):
         ).split('\n')[:-1]
 
     def indexing_finished(self):
+        call(['git', 'checkout', 'master'])
         project = ProjectMeta.select().where(ProjectMeta.name == self.project)
         if not project.exists():
             ProjectMeta.create(
