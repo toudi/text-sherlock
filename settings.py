@@ -8,7 +8,7 @@ from app_args import get_options
 config = {}
 try:
     import yaml
-    # Try to load local settings, which override the above settings.
+    # Try to load local settings, which override the default settings.
     # In local_settings.yml, set the values for any settings you want to override.
     yaml_path = os.path.join(os.path.dirname(__file__), 'local_settings.yml')
     if os.path.isfile(yaml_path):
@@ -200,10 +200,9 @@ INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh
 PROJECTS = config.get('projects', {})
 
 
-# Customzie the settings per installation
+# Use the local_settings.yml instead, noted at top of file
 try:
-    # use the local_settings.yml instead
     from local_settings import *
-    print '!!!Deprecated local_settings.py file: Use local_settings.yml instead.'
+    print '!!!Deprecated local_settings.py file found: Use local_settings.yml instead.'
 except ImportError:
-    print 'No local_settings.py found. Using all default settings.'
+    pass
