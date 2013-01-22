@@ -50,7 +50,6 @@ def adjust_test_settings():
     }
 
 
-
 def run_all():
     """Runs all unit tests
     """
