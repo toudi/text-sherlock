@@ -160,6 +160,8 @@ SITE_BANNER_COLOR = config.get('site_banner_color', 'black')
 
 # Default indexing backend.
 # This must be full import name.
+# type: string
+# default: 'core.sherlock.backends.whoosh_backend.WhooshIndexer'
 INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh_backend.WhooshIndexer')
 
 # Projects to index
@@ -186,6 +188,15 @@ INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh
 #            per-project setting of INCLUDE_FILE_SUFFIX
 #   - EXCLUDE_FILE_SUFFIX
 #            per-project setting of EXCLUDE_FILE_SUFFIX
+
+# Example local_settings.yml:
+# ---
+# projects:
+#   Test project:
+#     EXCLUDE_FILE_SUFFIX: [m, h]
+#     SETTINGS: {path: '%(sherlock_dir)s/tests/text', recursive: true}
+#     SOURCE: core.sherlock.indexer.source.filesystem.FileSystem
+
 PROJECTS = config.get('projects', {})
 
 
