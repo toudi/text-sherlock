@@ -17,7 +17,7 @@ Instructions:
 1. Run `python main.py --runserver` to start the web server.
 1. Go to `http://localhost:7777` to access the web interface. Uses the [twitter bootstrap](http://twitter.github.com/bootstrap) for its UI.
 
-You may need to install some packages before a *Ubuntu* installations will run without error.
+You may need to install some packages before a *Ubuntu* installation will run without error.
 
 - Install curl: `sudo apt-get install curl`
 - Install uuid libs: `sudo apt-get install uuid-dev`
@@ -92,6 +92,7 @@ settings.py
 * http://charlesleifer.com/docs/peewee/
 * http://www.cherrypy.org/
 * http://xapian.org/
+* http://pyyaml.org/wiki/PyYAMLDocumentation
 
 ## Project Goals
 
