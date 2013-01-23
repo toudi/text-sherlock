@@ -10,14 +10,15 @@ try:
     import yaml
     # Try to load local settings, which override the default settings.
     # In local_settings.yml, set the values for any settings you want to override.
-    yaml_path = os.path.join(os.path.dirname(__file__), 'local_settings.yml')
-    if os.path.isfile(yaml_path):
-        # try default path, root directory
+    default_yaml_path = os.path.join(os.path.dirname(__file__), 'local_settings.yml')
+    yaml_path = get_options().config
+    if os.path.isfile(default_yaml_path):
+        yaml_path = default_yaml_path
+        # try default path, proj/root directory
         config = yaml.load(open(yaml_path, 'r'))
-    elif os.path.isfile(get_options().config):
-        yaml_path = get_options().config
+    elif yaml_path and os.path.isfile(yaml_path):
         # try the specified config path
-        config = yaml.load(yaml_path)
+        config = yaml.load(open(yaml_path, 'r'))
     if config:
         print 'Loaded Sherlock config from %s' % yaml_path
 except ImportError:
@@ -121,7 +122,13 @@ MAX_SUB_RESULTS = config.get('max_sub_results', 3)
 # with each other.
 # type: string
 # default: 'whoosh'
-DEFAULT_SEARCHER = DEFAULT_INDEXER = config.get('DEFAULT_INDEXER', 'whoosh')
+DEFAULT_SEARCHER = DEFAULT_INDEXER = config.get('default_indexer', 'whoosh')
+
+# Default indexing backend.
+# This must be full import name.
+# type: string
+# default: 'core.sherlock.backends.whoosh_backend.WhooshIndexer'
+INDEXING_BACKEND = config.get('indexing_backend', 'core.sherlock.backends.whoosh_backend.WhooshIndexer')
 
 # Allows the indexer to ignore errors produced during file indexing.
 # For example: any unicode or file read errors, it will skip indexing those files.
@@ -158,12 +165,6 @@ SITE_TITLE = config.get('site_title', 'Text Sherlock')
 # default: black
 SITE_BANNER_COLOR = config.get('site_banner_color', 'black')
 
-# Default indexing backend.
-# This must be full import name.
-# type: string
-# default: 'core.sherlock.backends.whoosh_backend.WhooshIndexer'
-INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh_backend.WhooshIndexer')
-
 # Projects to index
 # This is a key-value dict, where:
 # - the key is the name of the project. It will be displayed at the left menu.
@@ -176,12 +177,12 @@ INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh
 #   - SETTINGS
 #            kwargs that will be passed to the source engine.
 #            Possible values depend on the source class.
-#            - Filesystem:
-#              - path : path to index
-#              - recursive : whether to traverse inside subdirectories
+#            - Filesystem
+#              - path: path to index
+#              - recursive: whether to traverse inside subdirectories
 #            - Git
-#              - url : url to your git repo
-#              - branch : branch to index (default: master)
+#              - url: url to your git repo
+#              - branch: branch to index (default: master)
 #   - BACKEND
 #            [ Optional ] backend to use. If none, use INDEXING_BACKEND
 #   - INCLUDE_FILE_SUFFIX
@@ -193,14 +194,14 @@ INDEXING_BACKEND = config.get('INDEXING_BACKEND', 'core.sherlock.backends.whoosh
 # ---
 # projects:
 #   Test project:
-#     EXCLUDE_FILE_SUFFIX: [m, h]
-#     SETTINGS: {path: '%(sherlock_dir)s/tests/text', recursive: true}
-#     SOURCE: core.sherlock.indexer.source.filesystem.FileSystem
+#     exclude_file_suffix: [m, h]
+#     settings: {path: '%(sherlock_dir)s/tests/text', recursive: true}
+#     source: core.sherlock.indexer.source.filesystem.FileSystem
 
 PROJECTS = config.get('projects', {})
 
 
-# Use the local_settings.yml instead, noted at top of file
+# Use the local_settings.yml instead, noted at the top of file
 try:
     from local_settings import *
     print '!!!Deprecated local_settings.py file found: Use local_settings.yml instead.'
