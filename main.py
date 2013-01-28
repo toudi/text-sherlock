@@ -32,8 +32,13 @@ def show_stats():
     print 'Available searcher backends: %s' % backends.searcher_names()
     print 'Current backend: %s' % settings.DEFAULT_SEARCHER
     # indexer stats
-    idxr = indexer.get_indexer()
-    print 'Total documents indexed: %d' % idxr.doc_count()
+    idx = indexer.Indexer()
+    print(
+        'Total documents indexed: %d' % sum(
+            idx.get_index(project).doc_count()
+                for project in settings.PROJECTS
+        )
+    )
     # database stats
     print 'Index Database: %s' % db.DATABASE_PATH
 

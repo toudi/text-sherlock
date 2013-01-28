@@ -9,7 +9,7 @@ __all__ = [
 
 
 class Indexer(object):
-    def __init__(self, app_args):
+    def __init__(self, app_args=None):
         self._log = None
         self.app_args = app_args
         #Separate instances in case anyone would like to multi-thread the indexing
@@ -22,7 +22,7 @@ class Indexer(object):
             'format': '%(asctime)-15s %(levelname)s %(message)s'
         }
 
-        if app_args.verbose:
+        if app_args and app_args.verbose:
             logging_cfg['level'] = logging.DEBUG
         logging.basicConfig(**logging_cfg)
 
@@ -30,7 +30,7 @@ class Indexer(object):
         """
         This is the entry point for indexing / rebuilding all of the indexes.
         """
-        if self.app_args.reindex == 'rebuild':
+        if self.app_args and self.app_args.reindex == 'rebuild':
             wait_time = 5  # seconds to wait/pause until rebuilding index
             print 'Reindexing everything!'
             print 'Waiting %ss for interrupt...' % wait_time
@@ -49,9 +49,9 @@ class Indexer(object):
         This is a separate method for the tests to be able to use it
         (without the need to repeating code: DRY)
         """
-        source_engine = import_by_name(options['SOURCE'])
-        options['SETTINGS']['project'] = project
-        source = source_engine(**options['SETTINGS'])
+        source_engine = import_by_name(options['source'])
+        options['settings']['project'] = project
+        source = source_engine(**options['settings'])
         source.index(self)
 
 
@@ -68,8 +68,8 @@ class Indexer(object):
                 PROJECTS[project] = inline
             else:
                 definition = PROJECTS[project]
-            if 'BACKEND' in definition:
-                backend = import_by_name(definition['BACKEND'])
+            if 'backend' in definition:
+                backend = import_by_name(definition['backend'])
             self.backends[project] = backend(project=project)
         return self.backends[project]
 
@@ -77,10 +77,10 @@ class Indexer(object):
         if not project in self.file_exclude:
             self.file_exclude[project] = None
             self.file_allow[project] = None
-            if len(PROJECTS[project].get('EXCLUDE_FILE_SUFFIX', [])) > 0:
-                self.file_exclude[project] = re.compile("\.(%s)$" % '|'.join(PROJECTS[project]['EXCLUDE_FILE_SUFFIX']))
-            if len(PROJECTS[project].get('INCLUDE_FILE_SUFFIX', [])) > 0:
-                self.file_allow[project] = re.compile("\.(%s)$" % '|'.join(PROJECTS[project]['INCLUDE_FILE_SUFFIX']))
+            if len(PROJECTS[project].get('exclude_file_suffix', [])) > 0:
+                self.file_exclude[project] = re.compile("\.(%s)$" % '|'.join(PROJECTS[project]['exclude_file_suffix']))
+            if len(PROJECTS[project].get('include_file_suffix', [])) > 0:
+                self.file_allow[project] = re.compile("\.(%s)$" % '|'.join(PROJECTS[project]['include_file_suffix']))
 
         if _file.basename().startswith('.'):
             return False
