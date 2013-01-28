@@ -15,6 +15,7 @@ from core.utils import debug
 from pygments import highlight
 from pygments.lexers import get_lexer_for_filename
 from pygments.formatters import HtmlFormatter
+from settings import ROOT_DIR
 
 
 class Transformer(object):
@@ -59,6 +60,14 @@ class Transformer(object):
         assert result is not None
         return self.to_html(result.context, result.filename)
 
+    def json(self, result=None):
+        path = '/'.join(result.path.replace("%s/%s" % (ROOT_DIR, 'src'), '').split('/')[2:])
+
+        return {
+            'file': path,
+            'match': result.context
+        }
+
     def to_html(self, text, filename, **kwargs):
         """Return highlighted HTML for the given text, based on filename
         (file type).
@@ -88,11 +97,10 @@ class Transformer(object):
         for result in results:
             item = Item()
             item.context = result.context
-            if type is not None:
-                item.html = self.html(result)
-            else:
-                item.html = result.context
-            item.result = result
+            if not type:
+                type = 'html'
+            _transformer = getattr(self, type)
+            item = _transformer(result)
             results.items.append(item)
         return results
 

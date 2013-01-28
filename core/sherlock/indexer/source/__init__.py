@@ -11,14 +11,16 @@ class IndexSource(object):
         for _file in self.get_files_for_index(self.indexer.app_args.reindex):
             _file = path(_file)
             if self.indexer.is_allowed(self.project, _file):
-                self.indexer.log(":: Adding file '%s' to index", _file)
-                self._index.index_file(_file)
+                if _file.isfile():
+                    self.indexer.log(":: Adding file '%s' to index", _file)
+                    self._index.index_file(_file)
 
         for _file in self.get_files_for_removal(self.indexer.app_args.reindex):
             _file = path(_file)
             if self.indexer.is_allowed(self.project, _file):
-                self.indexer.log(":: Removing file '%s' from index", _file)
-                self._index.remove_file(_file)
+                if _file.isfile():
+                    self.indexer.log(":: Removing file '%s' from index", _file)
+                    self._index.remove_file(_file)
 
         self._index.commit()
         self.indexing_finished()

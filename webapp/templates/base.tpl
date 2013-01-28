@@ -1,4 +1,5 @@
-<html class='{{ html_css_class }}'>
+<!doctype html>
+<html class='{{ html_css_class }}' ng-app="sherlock">
 
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
@@ -7,7 +8,11 @@
         <link rel="stylesheet" href="/static/css/background-gradients.css">
         <link rel="stylesheet" href="/static/css/main.css" type="text/css" charset="utf-8">
         <script src='/static/js/jquery.min.js'></script>
-        
+        <script type="text/javascript" src="/static/js/angular.min.js"></script>
+        <script type="text/javascript" src="/static/js/sherlock.js"></script>
+        <script type="text/javascript" src="/static/js/controllers/main-page-controller.js"></script>
+        <script type="text/javascript" src="/static/js/controllers/project-controller.js"></script>
+        <script type="text/javascript" src="/static/js/controllers/display-file-controller.js"></script>
         {% block header %}
         {% endblock %}
     </head>
@@ -39,11 +44,7 @@
             {% endif %}
         </div>
 
-        <div id="content">
-        {% block content %}
-            Content here
-        {% endblock %}
-        </div>
+        <div ng-view></div>
 <!--
     For His glory (Hebrews 1, Colossians 1, Genesis 1).
     Copyright 2011 Christopher Bess

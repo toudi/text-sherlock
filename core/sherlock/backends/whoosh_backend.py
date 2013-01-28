@@ -80,12 +80,12 @@ class WhooshIndexer(FileIndexer):
         contents = safe_read_file(filepath)
         if contents is None:
             return
-        path = unicode(filepath)
+        path = unicode(filepath.abspath())
         # build doc
         doc = dict(
             filename=unicode(os.path.basename(filepath)),
             path=path,
-            content=contents + path
+            content=contents
         )
         self._writer.update_document(**doc)
         pass

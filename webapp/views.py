@@ -3,7 +3,7 @@
 
 import os
 from server import app
-from flask import render_template, request, abort, Response
+from flask import render_template, request, abort, Response, jsonify
 from core.sherlock import indexer, searcher, transformer, db
 from core import settings as core_settings, FULL_INDEX_PATH
 from core import SherlockMeta
@@ -14,16 +14,16 @@ from template_filters import register_filters
 register_filters(app)
 
 
-def results_from_search_text(text, pagenum=1, isPath=False, type=None):
+def results_from_search_text(text, project, pagenum=1, isPath=False, type=None):
     """Returns the results from the search using the given text, populated with the transformed items
     """
-    idx = indexer.get_indexer(writable=False).get_index()
+    idx = indexer.Indexer().get_index(project).searcher()
     # find something in the index
     if isPath:
         results = idx.search_path(text)
     else:
         try:
-            results = idx.search(text, pagenum, core_settings.RESULTS_PER_PAGE)
+            results = idx.find_text(text, pagenum, core_settings.RESULTS_PER_PAGE)
         except ValueError, e:
             # This assumes the value error resulted from an page count issue
             app.logger.error('Out of page bounds: %s' % e)
@@ -52,6 +52,10 @@ def index():
     }
     add_default_response(response)
     return render_template('index.html', **response)
+
+@app.route('/projects')
+def projects():
+    return jsonify(projects=core_settings.PROJECTS.keys())
     
 
 @app.route('/search', methods=['POST', 'GET'])
@@ -65,8 +69,10 @@ def search():
         form = request.args
     search_text = form.get('q')
     pagenum = int(form.get('p', 1))
+    project = form.get('project');
+    out_type = form.get('type', 'html')
     app.logger.debug('page %d, searching for: %s' % (pagenum, search_text))
-    results = results_from_search_text(search_text, pagenum)
+    results = results_from_search_text(search_text,project, pagenum, type=out_type)
     
     # build response
     response = {
@@ -82,8 +88,10 @@ def search():
             'count' : len(results)
         }
     }
-    add_default_response(response)
-    return render_template('index.html', **response)
+    return jsonify(response)
+
+    #add_default_response(response)
+    #return render_template('index.html', **response)
 
 
 @app.route('/document', methods=['GET'])

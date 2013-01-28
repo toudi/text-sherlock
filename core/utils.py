@@ -54,8 +54,9 @@ def fragment_text(token, text):
     assert max_lines > 0
     if (not isinstance(settings.MATCHED_TERM_WRAP, tuple)
         or len(settings.MATCHED_TERM_WRAP) != 2):
-        raise Exception(
-            'Invalid matched term wrap. Please set MATCHED_TERM_WRAP setting.')
+            settings.MATCHED_TERM_WRAP = ['','']
+        #raise Exception(
+        #'Invalid matched term wrap. Please set MATCHED_TERM_WRAP setting.')
     nl = new_line
     # add the formatted token
     bText = text[:token.startchar]
@@ -89,6 +90,7 @@ def fragment_text(token, text):
             nextIdx = idx + 1
             idx = text.find(nl, nextIdx)
             line += 1
+
     # get token and context
     if prevIdx < 0:
         prevIdx = 0

@@ -1,0 +1,23 @@
+<div class="row-fluid">
+	<div class="span2">
+		<ul class="nav nav-list well">
+			<li class="nav-header">Projects</li>
+			<li ng-repeat="project in projects">
+				<a href="/#/{{ project }}">{{ project }}</a>
+			</li>
+		</ul>
+	</div>
+	<div class="span10">
+		<form method="get" action="/#/{{ project }}/search">
+			<input type="text" name="q" />
+			<button type="submit">Search</button>
+		</form>
+
+		<div ng-repeat="(file,matches) in results">
+			<h3>{{ file }}</h3>
+			<ul class="unstyled">
+				<li ng-repeat="match in matches">{{ match }}</li>
+			</ul>
+		</div>
+	</div>
+</div>
