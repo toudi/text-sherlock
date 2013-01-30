@@ -14,16 +14,16 @@ from template_filters import register_filters
 register_filters(app)
 
 
-def results_from_search_text(text, pagenum=1, isPath=False, type=None):
+def results_from_search_text(project, text, pagenum=1, isPath=False, type=None):
     """Returns the results from the search using the given text, populated with the transformed items
     """
-    idx = indexer.get_indexer(writable=False).get_index()
+    idx = indexer.Indexer().get_index(project).searcher()
     # find something in the index
     if isPath:
-        results = idx.search_path(text)
+        results = idx.find_path(text)
     else:
         try:
-            results = idx.search(text, pagenum, core_settings.RESULTS_PER_PAGE)
+            results = idx.find_text(text, pagenum, core_settings.RESULTS_PER_PAGE)
         except ValueError, e:
             # This assumes the value error resulted from an page count issue
             app.logger.error('Out of page bounds: %s' % e)
@@ -40,6 +40,7 @@ def add_default_response(response):
     response['site_title'] = core_settings.SITE_TITLE
     response['site_banner_color'] = core_settings.SITE_BANNER_COLOR
     response['last_indexed'] = SherlockMeta.get('last_indexed') or 'Never'
+    response['projects'] = core_settings.PROJECTS.keys()
     pass
     
 
@@ -48,46 +49,48 @@ def index():
     """Handles index requests
     """
     response = {
-        "title" : u"Welcome"
+        "title" : u"Welcome",
+        "projects": core_settings.PROJECTS.keys(),
     }
     add_default_response(response)
     return render_template('index.html', **response)
-    
 
-@app.route('/search', methods=['POST', 'GET'])
-def search():
-    """Handles search requests
+
+@app.route('/p/<project_name>')
+def project(project_name):
+    """Shows the search form, along with project browser
+       so that the user could change the project
     """
-    # get form vars
-    if request.method == 'POST':
-        form = request.form
-    else:
-        form = request.args
-    search_text = form.get('q')
-    pagenum = int(form.get('p', 1))
-    app.logger.debug('page %d, searching for: %s' % (pagenum, search_text))
-    results = results_from_search_text(search_text, pagenum)
-    
-    # build response
+
+    search_text = request.args.get('q')
+    pagenum     = int(request.args.get('p', 1))
+
     response = {
-        'title' : search_text or 'Search',
-        'html_css_class' : 'search',
-        'search_text' : search_text,
-        'results' : results.items,
-        'total_count' : results.total_count,
-        'page' : {
-            'current' : pagenum,
-            'previous' : results.prev_pagenum,
-            'next' : results.next_pagenum,
-            'count' : len(results)
-        }
+        'selected_project': project_name,
+        'form': search_text is None
     }
+
+    if search_text:
+        results = results_from_search_text(project_name, search_text, pagenum)
+        response.update({
+        'search_text': search_text,
+            'results': results.items,
+            'total_count': results.total_count,
+            'page': {
+                'current': pagenum,
+                'previous': results.prev_pagenum,
+                'next': results.next_pagenum,
+                'count': len(results)
+            }
+        })
+
     add_default_response(response)
-    return render_template('index.html', **response)
+
+    return render_template('project.html', **response)
 
 
-@app.route('/document', methods=['GET'])
-def document():
+@app.route('/p/<project_name>/document', methods=['GET'])
+def document(project_name):
     """Handles document display requests
     """
     http_status = 200
@@ -103,7 +106,7 @@ def document():
     pagenum = request.args.get('p')
 
     # perform the text search, get wrapped results
-    results = results_from_search_text(full_path, isPath=True)
+    results = results_from_search_text(project_name, full_path, isPath=True)
     if not results:
         app.logger.error('Unable to find document: %s' % full_path)
         abort(404)
@@ -138,7 +141,8 @@ def document():
         'search_text' : search_text,
         'page_number' : pagenum,
         'last_modified' : db_record.get('mod_date'),
-        'http_status' : http_status
+        'http_status' : http_status,
+        'selected_project': project_name,
     }
     add_default_response(response)
     return render_template('document.html', **response), http_status

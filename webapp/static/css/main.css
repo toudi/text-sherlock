@@ -9,10 +9,12 @@ html body {
     font-size: 15px;
     color: black;
 }
+/*
+fluid row
 #content {
     width: 850px;
     margin: 0 auto;
-}
+}*/
 .document #content {
     margin: auto;
     width: auto;
@@ -106,7 +108,10 @@ label {
 }
 td.linenos {
     padding-right: 0;
+    /*
+    didn't displayed properly
     width: 20px;
+    */
 }
 .syntax .sourcetable {
     border: none;

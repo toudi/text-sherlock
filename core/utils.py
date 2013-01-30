@@ -58,8 +58,19 @@ def fragment_text(token, text):
             'Invalid matched term wrap. Please set MATCHED_TERM_WRAP setting.')
     nl = new_line
     # add the formatted token
+    # count the number of new-line markers from the beggining of the file
+    # to the occurence of match
+    line_number = text.count(nl, 0, token.startchar) + 1
+    # fix the start line number, if there are more lines to be displayed
+    # than only the matching one
+    line_number_start = line_number - max_lines + 1
+    # count the total number of lines in the file in order to display line-numbers
+    # in fixed-width
+    leading_spaces = len(str(text.count(nl)))
+
     bText = text[:token.startchar]
     eText = text[token.endchar:]
+
     # encapsulate some code
     def format_token(token, text):
         """Returns the formatted token text that is inserted as apart
@@ -93,7 +104,34 @@ def fragment_text(token, text):
     if prevIdx < 0:
         prevIdx = 0
     # escape html before adding our own html for highlighting
-    token_text = cgi.escape(text[prevIdx:nextIdx])
+    # split by newlines in order to add line number.
+    # we ommit the first element though, because it's always an empty string
+    # (as text[prev:next] always starts with the newline marker)
+    token_text = cgi.escape(text[prevIdx:nextIdx]).split(nl)[1:]
+
+    # add line numbers to matches, starting with line number altered for number
+    # of context lines
+    line_number = line_number_start
+    for i, line in enumerate(token_text):
+        # replace the match
+        # rjust inserts spaces when text's length is less than x.
+        # we then replace spaces to non-breakable ones because regular spaces
+        # somehow don't display
+        # TODO: Fix that, if possible?
+        token_text[i] = "%s: %s" % (
+            str(line_number).rjust(leading_spaces).replace(' ', '&nbsp;'),
+            line
+        )
+        #get to next line, if possible
+        line_number += 1
+
+    # append empty string, because we want to join this with new-line markers
+    # again. if it wasn't for this empty string, the text wouldn't display
+    # properly (the line from the next match would display at the end of this
+    # match, and that's not what we want.)
+    token_text.append('')
+
+    token_text = nl.join(token_text)
     # replace html highlighter placeholders
     token_text = token_text.replace('[ts[[', settings.MATCHED_TERM_WRAP[0])
     token_text = token_text.replace(']]ts]', settings.MATCHED_TERM_WRAP[1])

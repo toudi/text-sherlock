@@ -5,62 +5,19 @@
 {% endblock %}
 
 {% block content %}
-<form action="/search" method="GET">
-    <div>
-        <!--<label for="text">Text</label>-->
-        <input type="text"
-               class="field"
-               name="q"
-               autocomplete="off"
-               autocorrect="off"
-               value="{{ search_text }}"
-               placeholder="Search text"
-               id="text" />
-    </div>
-
-    <!--<div>
-        <label for="path">Path</label>
-        <input type="text"
-               class="field"
-               name="path"
-               value="{{ path }}"
-               id="path">
-    </div>-->
-    <div>
-        <input type="submit"
-               value="Search"
-               class="btn primary"
-               id="submit" />
-        <a href='/' class="clear-btn">clear</a>
-    </div>
-
-    {% if search_text %}
-    <h4>Page <em>{{ page.current }}</em> of <em>{{ total_count }}</em> Results</h4>
-    {% endif %}
-
-    {% include "pagination.tpl" %}
-
-    <div id="results">
-        {% if results %}
-        {% for item in results %}
-        <div class='result' data-src="{{ item.result.index_path }}">
-            <div class="filename">
-                <a href='/document?path={{ item.result.index_path|urlencode }}&q={{ search_text }}&p={{ page.current }}'>/{{ item.result.index_path }}</a>
-            </div>
-            <div class="syntax">
-                <pre>{{ item.html|safe|trim }}</pre>
-            </div>
-        </div>
-        {% endfor %}
-        {% elif page %}
-        Your search - {{ search_text }} - did not match any documents{% if page.current > 1 %} for page {{ page.current }}{% endif %}.
-        {% endif %}
-    </div>
-</form>
-
-{% include "pagination.tpl" %}
-
-<div id='last-indexed'>
-    Indexes updated {{ last_indexed }}
+<div class="row-fluid">
+  <div class="span3">
+    <ul class="well nav nav-list">
+      <li class="nav-header">Available projects</li>
+      {% for project in projects %}
+      <li{% if selected_project == project %} class="active"{% endif %}><a href="/p/{{ project }}">{{ project }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span9">
+    {% block search_panel %}
+    <p class="lead">Use the project browser on the left in order to start searching.</p>
+    {% endblock %}
+  </div>
 </div>
 {% endblock %}

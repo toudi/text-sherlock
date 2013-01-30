@@ -16,7 +16,7 @@ def register_filters(app):
             return ''
         if isinstance(value, (str, unicode)):
             # make datetime
-            value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+            value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f')
         return value.strftime(format)
 
 
