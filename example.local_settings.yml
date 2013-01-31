@@ -1,5 +1,6 @@
 # settings overrides
 # Make a copy of this file and rename it to `local_settings.yml`
+# online yaml parser: http://yaml-online-parser.appspot.com/
 
 # A value indicating whether the app runs in debug mode.
 # type: boolean
@@ -18,3 +19,12 @@ include_file_suffix: [
 # type: string
 # default: '' or 'cherrypy'
 server_type: 'cherrypy'
+
+# Indexed projects
+projects:
+    MyProject:
+        source: 'core.sherlock.indexer.source.filesystem.FileSystem'
+        include_file_suffix: ['.m', '.c']
+        settings:
+            path: '%(sherlock_dir)s/tests/text'
+            recursive: true

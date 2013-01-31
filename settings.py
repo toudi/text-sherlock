@@ -193,7 +193,7 @@ SITE_BANNER_COLOR = config.get('site_banner_color', 'black')
 # Example local_settings.yml:
 # ---
 # projects:
-#   Test project:
+#   TestProject:
 #     exclude_file_suffix: [m, h]
 #     settings: {path: '%(sherlock_dir)s/tests/text', recursive: true}
 #     source: core.sherlock.indexer.source.filesystem.FileSystem
@@ -204,6 +204,6 @@ PROJECTS = config.get('projects', {})
 # Use the local_settings.yml instead, noted at the top of file
 try:
     from local_settings import *
-    print '!!!Deprecated local_settings.py file found: Use local_settings.yml instead.'
+    print '!!!Deprecated local_settings.py|pyc file found: Use local_settings.yml instead.'
 except ImportError:
     pass

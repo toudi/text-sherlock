@@ -1,5 +1,5 @@
 from path import path as _path
-from core.utils import resolve_path
+from core.utils import resolve_path, debug
 from . import IndexSource
 from ...db import IndexerMeta
 import os
