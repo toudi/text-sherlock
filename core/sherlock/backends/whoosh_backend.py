@@ -39,6 +39,7 @@ class WhooshIndexer(FileIndexer):
             os.makedirs(self._path)
         self._index = None
         self._writer = None
+        self.project = kwargs['project']
         pass
 
     @property

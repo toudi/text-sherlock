@@ -181,11 +181,15 @@ class SearchResult(object):
             filename = Filename of the file
         }
         """
+        from core.utils import get_root_path_for_project
+
         # the textual context of the hit
         self.context = ''
         self.path = kwargs.get('path')
         self.filename = kwargs.get('filename')
-        self.index_path = self.path.replace(FULL_INDEX_PATH, '')
+
+        self.index_path = self.path.replace(get_root_path_for_project(indexer.project), '')
+
         try:
             self.process_hit(hit)
         except IOError, e:

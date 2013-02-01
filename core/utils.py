@@ -6,6 +6,7 @@ import codecs
 from datetime import datetime
 from core.sherlock import logger as log
 import settings
+import os.path
 
 # Try ipython first, fallback to standard pdb.
 try:
@@ -192,3 +193,13 @@ def import_by_name(name):
     mod = __import__('.'.join(components[:-1]), fromlist=components[-1])
 
     return getattr(mod, components[-1])
+
+def get_root_path_for_project(project):
+    from core.sherlock.indexer import Indexer
+
+    if not hasattr(settings, '__ROOT_PATHS'):
+        settings.__ROOT_PATHS = {}
+    if not project in settings.__ROOT_PATHS:
+        settings.__ROOT_PATHS[project] = unicode(Indexer.get_root_path(project)) + os.path.sep
+
+    return settings.__ROOT_PATHS[project]

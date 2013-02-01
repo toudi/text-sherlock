@@ -7,7 +7,7 @@ from flask import render_template, request, abort, Response
 from core.sherlock import indexer, searcher, transformer, db
 from core import settings as core_settings, FULL_INDEX_PATH
 from core import SherlockMeta
-from core.utils import debug, read_file
+from core.utils import debug, read_file, get_root_path_for_project
 from template_filters import register_filters
 
 # register template filters
@@ -94,7 +94,7 @@ def document(project_name):
     """Handles document display requests
     """
     http_status = 200
-    root_dir = FULL_INDEX_PATH
+    root_dir = get_root_path_for_project(project_name)
     full_path = request.args.get('path')
     is_raw = (request.args.get('raw') == 'true')
     # allow `lines` or `hl` to highlight the target lines
@@ -102,6 +102,7 @@ def document(project_name):
     # if the full path wasn't appended, then append it (assumes path exist in default index path)
     if root_dir not in full_path:
         full_path = os.path.join(root_dir, full_path)
+
     search_text = request.args.get('q')
     pagenum = request.args.get('p')
 

@@ -1,4 +1,6 @@
 from path import path
+from core import FULL_INDEX_PATH
+
 class IndexSource(object):
     def index(self, indexer):
         self.indexer = indexer
@@ -31,3 +33,7 @@ class IndexSource(object):
 
     def get_files_for_removal(self, mode='update'):
         return ()
+
+    @staticmethod
+    def get_root_path(project):
+        return FULL_INDEX_PATH

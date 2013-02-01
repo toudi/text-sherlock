@@ -94,6 +94,12 @@ class Indexer(object):
         return self.file_allow[project] is None
 
 
+    @staticmethod
+    def get_root_path(project):
+        source = import_by_name(PROJECTS[project]['source'])
+        return source.get_root_path(project)
+
+
 def run(app_args):
     indexer = Indexer(app_args)
     return indexer.run()

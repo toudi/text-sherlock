@@ -23,6 +23,7 @@ class Git(IndexSource):
             if not src_path.exists():
                 src_path.makedirs(0755)
             repo = src_path / self.project
+            self.repo = repo
             if not repo.exists():
                 call([
                     'git', 'clone', self.url, repo
@@ -54,10 +55,10 @@ class Git(IndexSource):
         last_rev = self.get_last_rev()
 
         if last_rev:
-            return check_output(
+            return map(self.append_root_path, check_output(
                 self.git_diff_info % (last_rev, 'D'),
                 shell=True
-            ).split('\n')[:-1]
+            ).split('\n')[:-1])
 
         return ()
 
@@ -65,15 +66,18 @@ class Git(IndexSource):
         last_rev = self.get_last_rev()
 
         if last_rev is None or mode == 'rebuild':
-            return check_output(['git', 'ls-files']).split('\n')[:-1]
+            return map(self.append_root_path, check_output(['git', 'ls-files']).split('\n')[:-1])
 
-        return check_output(
+        return map(self.append_root_path, check_output(
             self.git_diff_info % (last_rev, '(A|M)'),
             shell=True
-        ).split('\n')[:-1]
+        ).split('\n')[:-1])
+
+    def append_root_path(self, file):
+        return "%s/%s" % (self.repo, file)
 
     def indexing_finished(self):
-        call(['git', 'checkout', 'master'])
+        call(['git', 'checkout', self.branch])
         project = ProjectMeta.select().where(ProjectMeta.name == self.project)
         if not project.exists():
             ProjectMeta.create(
@@ -85,3 +89,7 @@ class Git(IndexSource):
                 project = project.get()
                 project.rev = self.head
                 project.save()
+
+    @staticmethod
+    def get_root_path(project):
+        return path(ROOT_DIR) / "src" / project
