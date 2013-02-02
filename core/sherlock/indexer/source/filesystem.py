@@ -1,9 +1,10 @@
 from path import path as _path
-from core.utils import resolve_path, debug
+from core.utils import resolve_path
 from . import IndexSource
 from ...db import IndexerMeta
 import os
 from datetime import datetime
+from settings import PROJECTS
 
 
 class FileSystem(IndexSource):
@@ -60,3 +61,7 @@ class FileSystem(IndexSource):
                 )
             f.mod_date = mtime
             f.save()
+
+    @staticmethod
+    def get_root_path(project):
+        return resolve_path(PROJECTS[project]['settings']['path'])
