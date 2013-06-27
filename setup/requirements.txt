@@ -2,3 +2,5 @@ flask<=0.10
 peewee<=2.1.2
 path.py
 pyyaml
+whoosh<=2.5.0
+cherrypy<=3.2.2

@@ -4,12 +4,13 @@
 __all__ = [
     'whoosh', 'flask',
     'settings',
-    'flaskext',
+    'cherrypy_wsgiserver', 'flaskext',
     # settings
     'FULL_INDEXES_PATH', 'FORCE_INDEX_REBUILD',
     'FULL_INDEX_PATH'
 ]
 
+from cherrypy import wsgiserver as cherrypy_wsgiserver
 import flask
 import os
 import sys
@@ -60,7 +61,6 @@ def get_version_info(module):
     return {
         'cherrypy': cherrypy_ver,
         'whoosh': whoosh.versionstring,
-        'pygments': lambda: pygments.__version__,
         'flask': lambda: flask.__version__,
         'sherlock': sherlock_ver,
         }.get(module, lambda: '0.0')()
