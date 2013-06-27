@@ -3,7 +3,7 @@
     <ul>
         {% if page.previous > 0 %}
         <li class='prev'>
-            <a href="/search?q={{ search_text }}&p={{ page.previous }}">&larr; Previous</a>
+            <a href="/p/{{ selected_project }}?q={{ search_text }}&p={{ page.previous }}">&larr; Previous</a>
         </li>
         {% else %}
         <li class="prev disabled">
@@ -13,7 +13,7 @@
 
         {% if page.next > 0 %}
         <li class="next">
-            <a href="/search?q={{ search_text }}&p={{ page.next }}">Next &rarr;</a>
+            <a href="/p/{{ selected_project }}?q={{ search_text }}&p={{ page.next }}">Next &rarr;</a>
         </li>
         {% else %}
         <li class="nexxt disabled">

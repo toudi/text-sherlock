@@ -12,6 +12,8 @@ from core import settings
 from core import FULL_INDEX_PATH
 from core.sherlock import db
 from core.sherlock import logger
+from core.utils import read_file
+from ..line_extractors import extract_lines
 
 
 ## Indexer Base Classes
@@ -87,6 +89,7 @@ class FileSearcher(object):
         :param indexer: The sherlock.Indexer instance that is assigned to this search.
         """
         self._indexer = indexer
+        self.find_file = False
 
     def find_text(self, text, pagenum=1, limit=10):
         """Returns the search results for the given user text input.
@@ -171,7 +174,7 @@ class SearchResult(object):
     # the path within the index path. The full file path without the index path prepended.
     index_path = None
     
-    def __init__(self, hit, indexer, **kwargs):
+    def __init__(self, hit, searcher, **kwargs):
         """Initializes this Result instance.
 
         :param hit: The raw indexer search hit this instance represents
@@ -187,11 +190,19 @@ class SearchResult(object):
         self.context = ''
         self.path = kwargs.get('path')
         self.filename = kwargs.get('filename')
+        indexer = searcher.indexer
+        self.searcher = searcher
 
         self.index_path = self.path.replace(get_root_path_for_project(indexer.project), '')
+        self.rjust = 0
 
         try:
             self.process_hit(hit)
+            if not searcher.find_file:
+                try:
+                    (self.lines, self.rjust) = extract_lines(self.path, searcher.query)
+                except:
+                    self.lines = []
         except IOError, e:
             logger.warning('IOError while processing hit: %s:%s', self.path, e)
 
@@ -207,3 +218,4 @@ class SearchResult(object):
     def append_line(self, lines, text):
         """Appends the text to the target lines."""        
         lines.append("<div class='line'>%s</div>\n" % text.strip())
+

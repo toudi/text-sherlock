@@ -125,10 +125,12 @@ class WhooshSearcher(FileSearcher):
     def find_path(self, path):
         parser = QueryParser('path', self._index.schema)
         query = parser.parse(unicode(path))
+        self.find_file = True
         return self._search(query, limit=1)
 
     def find_text(self, text, pagenum=1, limit=10):
         parser = QueryParser('content', self._index.schema)
+        self.query = text
         query = parser.parse(unicode(text))
         return self._search(query, pagenum, limit)
 
@@ -145,15 +147,15 @@ class WhooshSearcher(FileSearcher):
         @return tuple of sherlock.Result objects
         """
         hits = results_page.results
-        hits.fragmenter = ResultFragmenter()
-        hits.formatter = ResultFormatter()
+        # hits.fragmenter = ResultFragmenter()
+        # hits.formatter = ResultFormatter()
         # create results wrapper
         results = WhooshResults(
             self,
             hits,
             total_count=hits.estimated_length(),
             pagenum=pagenum,
-            limit=limit
+            limit=limit,
         )
         return results
 
@@ -173,20 +175,14 @@ class WhooshResults(SearchResults):
             self.next_pagenum = -1
         # get the results
         for hit in hits:
-            result = WhooshResult(hit, self.searcher.indexer, **hit.fields())
+            result = WhooshResult(hit, self.searcher, **hit.fields())
             self.append(result)
         pass
 
 
 class WhooshResult(SearchResult):
     def process_hit(self, hit):
-        contents = read_file(self.path)
-        self.context = hit.highlights('content', text=contents)
-        # the file path could have matched
-        if not self.context:
-            self.context = self.path
         pass
-
 
 # refs:
 # https://bitbucket.org/mchaput/whoosh/src/4470a8812c9e/src/whoosh/highlight.py
@@ -208,7 +204,7 @@ class ResultFormatter(highlight.Formatter):
     def format(self, fragments, replace=False):
         lines = []
         for fragment in fragments:
-            context = fragment_text(fragment, fragment.text)
+            context = fragment_text(fragment, fragment.text, False)
             lines.append(context)
             if len(lines) >= self.max_sub_results:
                 break

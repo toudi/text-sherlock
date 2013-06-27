@@ -4,7 +4,7 @@
 import os
 from server import app
 from flask import render_template, request, abort, Response
-from core.sherlock import indexer, searcher, transformer, db
+from core.sherlock import indexer, searcher, db
 from core import settings as core_settings, FULL_INDEX_PATH
 from core import SherlockMeta
 from core.utils import debug, read_file, get_root_path_for_project
@@ -29,8 +29,7 @@ def results_from_search_text(project, text, pagenum=1, isPath=False, type=None):
             app.logger.error('Out of page bounds: %s' % e)
             return []
     # transform the results
-    trns = transformer.Transformer()
-    return trns.transform_results(results, type)
+    return results
 
 
 def add_default_response(response):
@@ -74,7 +73,7 @@ def project(project_name):
         results = results_from_search_text(project_name, search_text, pagenum)
         response.update({
         'search_text': search_text,
-            'results': results.items,
+            'results': results,
             'total_count': results.total_count,
             'page': {
                 'current': pagenum,
@@ -111,7 +110,7 @@ def document(project_name):
     if not results:
         app.logger.error('Unable to find document: %s' % full_path)
         abort(404)
-    doc = results.items[0]
+    doc = results[0]
 
     # grab contents, if file gone, then send 404 error message
     try:
@@ -126,19 +125,13 @@ def document(project_name):
         return Response(doc_contents, mimetype='text/plain')
     db_record = db.get_raw_file_record(full_path)
 
-    if http_status == 200:
-        # get syntax highlighted html
-        trn = transformer.Transformer()
-        doc_html = trn.to_html(doc_contents, doc.result.filename, highlight_lines=hl_str)
-    else:
-        doc_html = doc_contents
-
     # build response
     response = {
-        "title" : doc.result.filename,
+        "title" : doc.filename,
         'html_css_class' : 'document',
         'doc' : doc,
-        'contents' : doc_html,
+        "doc_html": doc_contents,
+        'line': int(request.args.get('line', 0))-1,
         'search_text' : search_text,
         'page_number' : pagenum,
         'last_modified' : db_record.get('mod_date'),

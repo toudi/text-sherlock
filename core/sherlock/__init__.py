@@ -12,6 +12,4 @@ import logging
 logger = logging.getLogger('core.sherlock')
 
 # import needed core modules or packages for easy access
-from core import whoosh
-from core import pygments
 from core import flask

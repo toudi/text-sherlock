@@ -3,20 +3,17 @@
 # import packages here to help support the two available setups
 __all__ = [
     'whoosh', 'flask',
-    'pygments', 'settings',
-    'cherrypy_wsgiserver', 'flaskext',
+    'settings',
+    'flaskext',
     # settings
     'FULL_INDEXES_PATH', 'FORCE_INDEX_REBUILD',
     'FULL_INDEX_PATH'
 ]
 
-from cherrypy import wsgiserver as cherrypy_wsgiserver
 import flask
 import os
-import pygments
 import sys
 import whoosh
-
 import ConfigParser
 import settings
 import utils

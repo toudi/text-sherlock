@@ -39,3 +39,7 @@ def register_filters(app):
         if not value:
             return ''
         return urllib.quote_plus(value, '/')
+
+    @app.template_filter('rjust')
+    def filter_rjust(value, num):
+        return str(value).rjust(num)

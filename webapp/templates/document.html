@@ -1,22 +1,43 @@
 {% extends "project.html" %}
 
 {% block header %}
-<link rel="stylesheet" href="/static/css/pygments-style.css" type="text/css" media="screen" charset="utf-8">
 {% endblock %}
 
 {% block search_panel %}
     &larr; <a href="/p/{{ selected_project }}?q={{ search_text }}&p={{ page_number }}">Back to search</a>
-    <h3>{{ doc.result.path }}</h3>
+    <h3>{{ doc.path }}</h3>
         
     {% if http_status == 200 %}
     <p>
         <a href='{{ request.url }}&raw=true' class="btn small">raw</a>
     </p>
     {% endif %}
-        
-    <div class="syntax">
-    {{ contents|safe }}
-    </div>
 
-    <div id='last-mod'>File last modified on {{ last_modified|dt_format }}</div>
+<input type="hidden" id="line" value="{{ line }}" />
+<pre class="prettyprint linenums">{{ doc_html|safe }}</pre>
+
+<div id='last-mod'>File last modified on {{ last_modified|dt_format }}</div>
+<style>
+li.L0, li.L1, li.L2, li.L3,
+li.L5, li.L6, li.L7, li.L8
+{ list-style-type: decimal !important;}
+ol.linenums li {margin-left: 25px !important;}
+</style>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+
+<script type="text/javascript">
+    $(window).load(function(){
+        $("ol.linenums li").click(function(){
+           $("ol.linenums li").removeClass('highlight');
+           $(this).addClass('highlight');
+           $('html, body').animate({
+                scrollTop: $(this).offset().top
+           })
+        });
+        selected_line = $("ol.linenums li:eq("+$('#line').val()+")");
+        selected_line.click();
+    });
+</script>
+
 {% endblock %}
+

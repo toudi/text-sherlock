@@ -83,8 +83,12 @@ label {
 #results {
     margin-top: 5px;
 }
+
+.result a {text-decoration: none;}
 .result pre {
-    padding: 15px;
+    margin: 0;
+    padding:0;
+    /*padding: 15px;*/
     font-family: Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
     background-color: ghostWhite;
     border: 1px solid #DEDEDE;
@@ -160,7 +164,7 @@ td.linenos pre a:hover {
     color: #000000;
 }
 /*matched term in each search result*/
-.result .match {
+.result .highlight {
     /*Google code search style*/
     /*font-weight: bold;*/
     /*padding: 2px;*/
@@ -170,3 +174,5 @@ td.linenos pre a:hover {
     font-style: italic;
     background-color: #ffff99;
 }
+
+ol.linenums li.highlight {background-color: #ffff99}
