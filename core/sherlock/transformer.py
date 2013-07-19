@@ -10,11 +10,7 @@ pygments/formatters/html.py
 https://bitbucket.org/birkenfeld/pygments-main/src/72d5ec2c3be6/pygments/formatters/html.py
 """
 
-import pygments
 from core.utils import debug
-from pygments import highlight
-from pygments.lexers import get_lexer_for_filename
-from pygments.formatters import HtmlFormatter
 
 
 class Transformer(object):

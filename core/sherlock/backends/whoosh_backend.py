@@ -124,7 +124,7 @@ class WhooshSearcher(FileSearcher):
 
     def find_path(self, path):
         parser = QueryParser('path', self._index.schema)
-        query = parser.parse(unicode(path))
+        query = parser.parse('*'+unicode(path)+'*')
         self.find_file = True
         return self._search(query, limit=1)
 
