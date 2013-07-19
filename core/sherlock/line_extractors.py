@@ -1,15 +1,16 @@
 import settings
 import linecache
 from subprocess import check_output
+import codecs
 
 def extract_lines(_file, query):
     context_lines = settings.NUM_CONTEXT_LINES
 
     out = []
     used_lines = []
-    with open(_file) as input:
+    with codecs.open(_file, 'r', 'utf-8') as input:
         for lineno, line in enumerate(input):
-            if query.lower() in unicode(line, 'utf-8').lower():
+            if query.lower() in line.lower():
                 for _line in range(lineno - context_lines, lineno + 1 + context_lines):
                     content = linecache.getline(_file, _line+1)
                     if content.strip():
